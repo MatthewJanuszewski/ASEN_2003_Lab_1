@@ -9,7 +9,7 @@ R = 50;
 r = 45;
 r2 = 15;
 lR = 20;
-tR = 5;
+tR = 20;
 
 %Element 1 - valley
 x = -R*cos(t);
@@ -138,15 +138,37 @@ x6 = t6 + x5(end);
 y6 = 0.*t6 + y5(end);
 z6 = 0.*t6 + z5(end);
 
-Normx6 = 0.*t4*m;
-Normy6 = 0.*t4*m;
-Normz6 = (0.*t4+g)*m;
+Normx6 = 0.*t6*m;
+Normy6 = 0.*t6*m;
+Normz6 = (0.*t6+g)*m;
 
 %Banked turn
 t7 = linspace(0,pi,50);
 x7 = tR*sin(t7) + x6(end);
 y7 = -tR*cos(t7) + y6(end) + tR;
 z7 = 0.*t7 + z6(end);
+
+v7 = getSpeed(z7,h0);
+an7 = v7.^2/tR;
+
+%Tangential component slope
+Tx7 = tR*cos(t7);
+Ty7 = tR*sin(t7);
+Tz7 = 0.*t7;
+
+%Normal acceleration component 
+Nx7 = -tR*sin(t7);
+Ny7 = tR*cos(t7);
+Nz7 = 0.*t7;
+Nm7 = (Nx7.^2 + Ny7.^2 + Nz7.^2).^(.5);
+nx7 = Nx7./Nm7;
+ny7 = Ny7./Nm7;
+nz7 = Nz7./Nm7;
+
+Normx7 = nx7.*an7*m;
+Normy7 = ny7.*an7*m;
+Normz7 = (0.*t7+g)*m;
+
 
 %Transition
 t8 = linspace(pi/2,5*pi/6,100);
@@ -175,9 +197,9 @@ x11 = -t6 + x10(end);
 y11 = 0.*t6 + y10(end);
 z11 = 0.*t6 + z10(end);
 
-Normxfin = [Normx, Normx2, Normx3, Normx4, Normx5];
-Normyfin = [Normy, Normy2, Normy3, Normy4, Normy5];
-Normzfin = [Normz, Normz2, Normz3, Normz4, Normz5];
+Normxfin = [Normx, Normx2, Normx3, Normx4, Normx5, Normx6, Normx7];
+Normyfin = [Normy, Normy2, Normy3, Normy4, Normy5, Normy6, Normy7];
+Normzfin = [Normz, Normz2, Normz3, Normz4, Normz5, Normz6, Normz7];
 
 %G's
 Gx = Normxfin./(m*g);
@@ -198,7 +220,11 @@ xlim([-100,200]);
 ylim([-150,150]);
 zlim([0,150]);
 figure(2);
-plot(G);
+plot(Gx);
+hold on;
+plot(Gy);
+plot(Gz);
+
 function v = getSpeed(h,h0)
     v = (2*9.8*(h0-h)).^(.5);
 end
