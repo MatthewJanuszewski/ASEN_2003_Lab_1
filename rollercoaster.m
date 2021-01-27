@@ -4,14 +4,14 @@ close all;
 h0 = 125;
 m = 1;
 g = 9.8;
-t = linspace(0,3*pi/4,100);
 R = 50;
 r = 45;
-r2 = 15;
+r2 = 25;
 lR = 20;
 tR = 20;
 
 %Element 1 - valley
+t = linspace(0,3*pi/4,100);
 x = -R*cos(t);
 y = 0.*t;
 z = h0-R*sin(t);
@@ -176,30 +176,92 @@ x8 = r2*cos(t8) + cos(pi/2)*r2 + x7(end);
 y8 = 0.*t8 + y7(end);
 z8 = r2*sin(t8) - sin(pi/2)*r2 + z7(end);
 
+%Tangential component slope
+Tx8 = -r2*sin(t8);
+Ty8 = 0.*t8;
+Tz8 = r2*cos(t8);
+Tm8 = (Tx8.^2 + Ty8.^2 + Tz8.^2).^(.5);
+
+
+%Normal acceleration component 
+Nx8 = -r2*cos(t8);
+Ny8 = 0.*(t8);
+Nz8 = -r2*sin(t8);
+Nm8 = (Nx8.^2 + Ny8.^2 + Nz8.^2).^(.5);
+nx8 = Nx8./Nm8;
+ny8 = Ny8./Nm8;
+nz8 = Nz8./Nm8;
+
+%Normal acceleration of circle
+v8 = getSpeed(z8,h0);
+an8 = v8.^2/r2;
+
+%Normal force components
+theta8 = atan(abs(nz8./nx8));
+Ng8 = g*sin(theta8);
+Normx8 = nx8.*an8*m;
+Normy8 = ny8.*an8*m;
+Normz8 = (nz8.*an8+Ng8)*m;
 
 %Downward slope
 
-t9 = linspace(0,30,100);
+t9 = linspace(0,40,100);
 x9 = -cos(pi/3).*t9 + x8(end);
 y9 = 0.*t9 + y8(end);
 z9 = -sin(pi/3)*t9 + z8(end);
 
+N9 = cos(pi/3)*m*g*ones(1,length(t9));
+Normx9 = sin(pi/3).*N9;
+Normy9 = 0.*t9;
+Normz9 = cos(pi/3).*N9;
+
 %Transition
-rf = h0-z9(end);
+rf = 2*z9(end);
 t10 = linspace(11*pi/6,3*pi/2,100);
 x10 = rf*cos(t10) - cos(11*pi/6)*rf + x9(end);
 y10 = 0.*t10 + y9(end);
 z10 = rf*sin(t10) - sin(11*pi/6)*rf + z9(end);
 
-%Braking zone
-t11 = linspace(0,60,100);
-x11 = -t6 + x10(end);
-y11 = 0.*t6 + y10(end);
-z11 = 0.*t6 + z10(end);
+%Tangential component slope
+Tx10 = -rf*sin(t10);
+Ty10 = 0.*t10;
+Tz10 = rf*cos(t10);
+Tm10 = (Tx10.^2 + Ty10.^2 + Tz10.^2).^(.5);
 
-Normxfin = [Normx, Normx2, Normx3, Normx4, Normx5, Normx6, Normx7];
-Normyfin = [Normy, Normy2, Normy3, Normy4, Normy5, Normy6, Normy7];
-Normzfin = [Normz, Normz2, Normz3, Normz4, Normz5, Normz6, Normz7];
+
+%Normal acceleration component 
+Nx10 = -rf*cos(t10);
+Ny10 = 0.*(t10);
+Nz10 = -rf*sin(t10);
+Nm10 = (Nx10.^2 + Ny10.^2 + Nz10.^2).^(.5);
+nx10 = Nx10./Nm10;
+ny10 = Ny10./Nm10;
+nz10 = Nz10./Nm10;
+
+%Normal acceleration of circle
+v10 = getSpeed(z10,h0);
+an10 = v10.^2/rf;
+
+%Normal force components
+theta10 = atan(abs(nz10./nx10));
+Ng10 = g*sin(theta10);
+Normx10 = nx10.*an10*m;
+Normy10 = ny10.*an10*m;
+Normz10 = (nz10.*an10+Ng10)*m;
+
+%Braking zone
+t11 = linspace(0,100,100);
+x11 = -t11 + x10(end);
+y11 = 0.*t11 + y10(end);
+z11 = 0.*t11 + z10(end);
+v110 = getSpeed(z11(1),h0);
+ax = -(v110)^2/(2*(x11(end)-x11(1)));
+
+v11 = (v110^2+2*(ax)*(x11-x11(1))).^.5;
+
+Normxfin = [Normx, Normx2, Normx3, Normx4, Normx5, Normx6, Normx7, Normx8, Normx9, Normx10];
+Normyfin = [Normy, Normy2, Normy3, Normy4, Normy5, Normy6, Normy7, Normy8, Normy9, Normy10];
+Normzfin = [Normz, Normz2, Normz3, Normz4, Normz5, Normz6, Normz7, Normz8, Normz9, Normz10];
 
 %G's
 Gx = Normxfin./(m*g);
@@ -210,7 +272,9 @@ G = (Gx.^2+Gy.^2+Gz.^2).^(.5);
 Xfin = [x,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11];
 Yfin = [y,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11];
 Zfin = [z,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11];
-Vfin = getSpeed(Zfin,h0);
+
+Vfin = getSpeed([z,z2,z3,z4,z5,z6,z7,z8,z9,z10],h0);
+Vfin = [Vfin, v11];
 figure(1);
 colormap(hsv)
 patch([Xfin nan],[Yfin nan],[Zfin nan],[Vfin nan],'FaceColor','none','EdgeColor','interp','LineWidth',2);
@@ -218,12 +282,15 @@ colorbar
 view(3)
 xlim([-100,200]);
 ylim([-150,150]);
-zlim([0,150]);
+zlim([-50,150]);
 figure(2);
 plot(Gx);
 hold on;
 plot(Gy);
 plot(Gz);
+
+figure(3);
+plot(G);
 
 function v = getSpeed(h,h0)
     v = (2*9.8*(h0-h)).^(.5);
