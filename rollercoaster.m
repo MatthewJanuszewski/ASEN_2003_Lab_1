@@ -64,7 +64,7 @@ Normy2 = 0.*t2;
 Normz2 = 0.*t2;
 
 %Transition
-t3 = linspace(pi/4,pi/2,50);
+t3 = linspace(pi/4,pi/2,100);
 x3 = -r*cos(t3)+x2(end)+cos(pi/4)*r;
 y3 = 0.*t3 + y2(end);
 z3 = -r*sin(t3)+z2(end)+sin(pi/4)*r;
@@ -151,7 +151,7 @@ Normy6 = 0.*t6*m;
 Normz6 = (0.*t6+g)*m;
 
 %Banked turn
-t7 = linspace(0,pi,50);
+t7 = linspace(0,pi,100);
 x7 = tR*sin(t7) + x6(end);
 y7 = -tR*cos(t7) + y6(end) + tR;
 z7 = 0.*t7 + z6(end);
@@ -268,7 +268,7 @@ y11 = 0.*t11 + y10(end);
 z11 = 0.*t11 + z10(end);
 v110 = getSpeed(z11(1),h0);
 ax = -(v110)^2/(2*(x11(end)-x11(1)));
-s11 = x11(end)-x11(1);
+s11 = abs(x11(end)-x11(1));
 
 v11 = (v110^2+2*(ax)*(x11-x11(1))).^.5;
 
@@ -280,13 +280,25 @@ Normxfin = [Normx, Normx2, Normx3, Normx4, Normx5, Normx6, Normx7, Normx8, Normx
 Normyfin = [Normy, Normy2, Normy3, Normy4, Normy5, Normy6, Normy7, Normy8, Normy9, Normy10, Normy11];
 Normzfin = [Normz, Normz2, Normz3, Normz4, Normz5, Normz6, Normz7, Normz8, Normz9, Normz10, Normz11];
 
+axis1 = linspace(0,s1,100);
+axis2 = linspace(axis1(end),axis1(end)+s2,100);
+axis3 = linspace(axis2(end),axis2(end)+s3,100);
+axis4 = linspace(axis3(end),axis3(end)+s4,100);
+axis5 = linspace(axis4(end),axis4(end)+s5,100);
+axis6 = linspace(axis5(end),axis5(end)+s6,100);
+axis7 = linspace(axis6(end),axis6(end)+s7,100);
+axis8 = linspace(axis7(end),axis7(end)+s8,100);
+axis9 = linspace(axis8(end),axis8(end)+s9,100);
+axis10 = linspace(axis9(end),axis9(end)+s10,100);
+axis11 = linspace(axis10(end),axis10(end)+s11,100);
+
+axis = [axis1, axis2, axis3, axis4, axis5, axis6, axis7, axis8, axis9, axis10, axis11];
+
 %G's
 Gx = Normxfin./(m*g);
 Gy = Normyfin./(m*g);
 Gz = Normzfin./(m*g);
 G = (Gx.^2+Gy.^2+Gz.^2).^(.5);
-
-
 
 Xfin = [x,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11];
 Yfin = [y,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11];
@@ -298,28 +310,48 @@ Vfin = [Vfin, v11];
 figure(1);
 colormap(hsv)
 patch([Xfin nan],[Yfin nan],[Zfin nan],[Vfin nan],'FaceColor','none','EdgeColor','interp','LineWidth',2);
-colorbar
+title('Roller Coaster w/ Velocity');
+xlabel('X Position [m]');
+ylabel('Y Position [m]');
+zlabel('Z Position [m]');
+h = colorbar;
+ylabel(h, 'Velocity [m/s]')
+grid on;
+
 view(3)
 xlim([-100,200]);
 ylim([-150,150]);
 zlim([-50,150]);
 figure(2);
-plot(Gx);
+plot(axis,Gx);
 hold on;
-plot(Gy);
-plot(Gz);
+plot(axis,Gy);
+plot(axis,Gz);
+title('G-Force Components (Cartesian)');
+xlabel('Track length [m]');
+ylabel('G-Force');
+legend('G-Force in X','G-Force in Y','G Force in Z');
 
 figure(3);
-plot(G);
+title('G-Force Throughout Track (Cartesian)');
+plot(axis,G);
+xlabel('Track length [m]');
+ylabel('Total G-Force');
 
 figure(4);
 colormap(hsv)
 patch([Xfin nan],[Yfin nan],[Zfin nan],[G nan],'FaceColor','none','EdgeColor','interp','LineWidth',2);
-colorbar
+title('Roller Coaster w/ G-Force');
+xlabel('X Position [m]');
+ylabel('Y Position [m]');
+zlabel('Z Position [m]');
+h = colorbar;
+ylabel(h, 'G-Force')
 view(3)
 xlim([-100,200]);
 ylim([-150,150]);
 zlim([-50,150]);
+grid on;
 
 function v = getSpeed(h,h0)
     v = (2*9.8*(h0-h)).^(.5);
